@@ -1,24 +1,20 @@
 import csv
+from datetime import datetime, timedelta 
 
-def pegar_estacoes(path_estacoes:str, tipo_estacoes:str) ->list:
-    """
-    Args:
-        path_estacoes (str): _description_
-        tipo_estacoes (str): _description_
+def separar_periodo(dateInicial: datetime.datetime, dateFinal: datetime.datetime, arquivoSource: str, arquivoFinal: str):
+    dateSeguinte = dateInicial + timedelta(days=1)
+    diaAtual = dateInicial.strftime("%Y%M%D")
 
-    Returns:
-        list: Lista com os códigos das estações do mesmo tipo de tipo_estacoes
-    """
-    codigos = list()
-
-    with open(path_estacoes) as file:
-        spamreader = csv.reader(file, delimiter=';')
-        codigos = [cod[2] for cod in spamreader if tipo_estacoes in cod[1] ]        
+    with open(arquivoSource) as f, open(arquivoFinal) as fFinal:
+        spamreader = csv.reader(f, delimiter=';')
+        
+        for row in spamreader:
 
 
-    return codigos
 
-path_estacoes = 'estacoes.csv'
-tipo_estacoes = 'INMET'
-a = pegar_estacoes(path_estacoes, tipo_estacoes)
-print(a)
+arquivoSource =  'Dados-Processados/INMET/INMET_S_RS_A801_PORTO ALEGRE - JARDIM BOTANICO_01-01-2024_A_30-11-2024.CSV'
+arquivoFinal = ''
+dataComeco = datetime.datetime(2024, 4, 17)
+dataFinal = datetime.datetime(2024, 5, 25)
+
+separar_periodo('1', '1', arquivoSource, arquivoFinal)
