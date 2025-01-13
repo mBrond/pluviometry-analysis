@@ -1,37 +1,36 @@
-import csv
 import os
+import pandas as pd
+from datetime import datetime 
 
-def get_all_files(directory):
-    return [file for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))]
-
-def pegar_estacoes(path_estacoes:str, tipo_estacoes:str) ->list:
-    """
-    Args:
-        path_estacoes (str): _description_
-        tipo_estacoes (str): _description_
-
-    Returns:
-        list: Lista com os códigos das estações do mesmo tipo de tipo_estacoes
-    """
-    codigos = list()
-
-    with open(path_estacoes) as file:
-        spamreader = csv.reader(file, delimiter=';')
-        codigos = [cod[2] for cod in spamreader if tipo_estacoes in cod[1] ]        
+import utilidades
+from cemaden import tratar_dados_cemaden
+from inmet import separar_arquivos_inmet, separar_periodo_inmet
 
 
-    return codigos
+def main():
+    pathBrutos = 'Dados-Brutos'
+    pathProcessados = 'Dados-Processados'
 
-path_estacoes = 'estacoes.csv'
-tipo_estacoes = 'INMET'
-codigos = pegar_estacoes(path_estacoes, tipo_estacoes)
+    utilidades.criar_pastas(pathBrutos, pathProcessados)
+    
+    #CEMADEN
+    #Cada download no CEMADEN consiste em um arquivo com dados de uma estação no período de um mês
+    #Tem captcha, download manual
+    tratar_dados_cemaden(pathBrutos+'\\CEMADEN', '2024-04-27', '2024-05-15')
 
-dirSource = 'Dados-Brutos/INMET/'
-dirEnd = 'Dados-Separados/INMET/'
-arquivos = get_all_files(dirSource)
+    utilidades.converter_csv_para_xls(pathProcessados+'\\CEMADEN')
+    # utilidades.apagar_nao_csv(pathProcessados+'\\CEMADEN')
 
-arquivosSeparados = [arq for arq in arquivos if any(codigo in arq for codigo in codigos)]
+    #INMET
+    #Cada download do INMET consiste no download um ZIP com vários arquivos separados por estação, no período de um ano 
+    separar_arquivos_inmet(f'{pathBrutos}\\INMET\\', f'{pathProcessados}\\INMET\\')
 
-for arq in arquivosSeparados:
-    os.rename(dirSource+arq, dirEnd+arq)
+    dataComeco = datetime(2024, 4, 17)
+    dataFinal = datetime(2024, 5, 25)
+    for nomeArquivo in utilidades.get_all_files(f'{pathProcessados}\\INMET\\'):
+        arquivoFinal = f'{pathProcessados}\\INMET\\csv\\{nomeArquivo}'
+        separar_periodo_inmet(dataComeco, dataFinal, f'{pathProcessados}\\INMET\\{nomeArquivo}', arquivoFinal)
+    utilidades.converter_csv_para_xls_externo(f'{pathProcessados}\\INMET\\csv', f'{pathProcessados}\\INMET\\xls')
 
+if __name__ == '__main__':
+    main()

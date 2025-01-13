@@ -73,7 +73,6 @@ def copiar_comeco_meio(spamreader, arquivoFinal, dataFinal)->None:
     for row in spamreader:
         if dataFinal not in row[-2]:
             for item in row:
-                # print(item)
                 arquivoFinal.write(item+';')
             arquivoFinal.write('\n')
         else:
@@ -94,7 +93,7 @@ def renomear_todos_arquivos(path: str):
             nomeEstacao = pega_nome(spamreader)
         os.rename(f'{path}/{file}', f'{path}/{nomeEstacao}-{mes}.csv')
 
-def main(pathBrutos:str, dataComeco:str, dataFinal:str)->None:
+def tratar_dados_cemaden(pathBrutos:str, dataComeco:str, dataFinal:str)->None:
     """Tratamento de dados dos arquivos do CEMADEN. Só funciona para pegar datas entre 04/2024 e 05/2024.
 
     Args:
@@ -102,6 +101,11 @@ def main(pathBrutos:str, dataComeco:str, dataFinal:str)->None:
         dataComeco (str): data inicial de abril que será copiada
         dataFinal (str): data final que para a cópia dos dados (não inclusa)
     """
+    #PROVAVEIS ERROS: 
+    #SE TIVER MAIS DE UM ARQUIVOS COM O MESMO {Nome Estacap (municipio)} + {mes/ano}
+    #SE A DATA FINAL NAO EXISTIR NO ARQUIVO DE MAIO
+    #----
+    #em algum momento deixei de seguir a padronização de váriaveis.
     renomear_todos_arquivos(pathBrutos)
 
     todosArquivos = os.listdir(pathBrutos)
@@ -127,11 +131,3 @@ def main(pathBrutos:str, dataComeco:str, dataFinal:str)->None:
 
             with open(pathFinal, 'a', encoding="utf8") as fFinal:
                 copiar_comeco_meio(spamreader, fFinal, dataFinal)
-
-
-main('Dados-Brutos/CEMADEN', '2024-04-27', '2024-05-15')
-#PROVAVEIS ERROS: 
-#SE TIVER MAIS DE UM ARQUIVOS COM O MESMO {Nome Estacap (municipio)} + {mes/ano}
-#SE A DATA FINAL NAO EXISTIR NO ARQUIVO DE MAIO
-#----
-#em algum momento deixei de seguir a padronização de váriaveis.
